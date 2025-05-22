@@ -1,0 +1,59 @@
+server:
+  port: 3030
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: auth-service
+          uri: http://localhost:3031
+          predicates:
+            - Path=/auth/**
+        - id: course-service
+          uri: http://localhost:3032
+          predicates:
+            - Path=/courses/**
+        - id: user-service
+          uri: http://localhost:3033
+          predicates:
+            - Path=/users/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: gateway
+            client-secret: I68rfFU4wlRWv0vWWDk23rk0NQIeMsLt
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, email
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8282/realms/learning-platform
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8282/realms/learning-platform
+
+logging:
+  level:
+    org.springframework.security: DEBUG
